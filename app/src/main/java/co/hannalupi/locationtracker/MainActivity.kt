@@ -1,5 +1,6 @@
 package co.hannalupi.locationtracker
 
+import android.app.Activity
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
@@ -8,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import co.hannalupi.locationtracker.service.LocationForegroundService
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,6 +19,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     private val TAG = MainActivity::class.java.simpleName
     private val SHARED_PREFS = "shared_prefs"
     private val TRACKING_ENABLED = "tracking_enabled"
+
+    private val LOCATION_ACCESS_REQUEST = 1
 
     private lateinit var sharedPrefs : SharedPreferences
 
@@ -68,20 +72,23 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     }
 
     override fun onStop() {
-        super.onStop()
         if (::sharedPrefs.isInitialized) {
             sharedPrefs.unregisterOnSharedPreferenceChangeListener(this)
         }
-        unbindService(serviceConnection)
-        service = null
-        isBound = false
 
-        startService(Intent(this, LocationForegroundService::class.java))
+        if (isBound) {
+            unbindService(serviceConnection)
+            service = null
+            isBound = false
+        }
+        super.onStop()
+
+        //startService(Intent(this, LocationForegroundService::class.java))
     }
 
-    fun startTracking(view : View) {
+    fun startTracking(view: View) {
         Log.d(TAG, "startTracking()")
-        updateUserEnabledTracking(true)
+        startActivityForResult(Intent(this, LocationAccessActivity::class.java), LOCATION_ACCESS_REQUEST)
     }
 
     fun stopTracking(view : View) {
@@ -93,6 +100,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         Log.d(TAG, "onSharedPreferencesChanged")
         //TODO: Revisit this, maybe this should save this value to a member variable
         updateButtonEnabledState(userEnabledTracking())
+        if(userEnabledTracking()) {
+            service?.registerLocationUpdates()
+        }
     }
 
     private fun getServiceConnection() : ServiceConnection {
@@ -126,41 +136,17 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         stopBtn?.isEnabled = trackingEnabled
     }
 
-//    private fun hasLocationAccess() : Boolean {
-//        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_DENIED
-//    }
-
-//    private fun requestLocationAccess() {
-//
-//        service?.let{
-//            val builder = LocationSettingsRequest.Builder()
-//                .addLocationRequest(it.createLocationRequest())
-//            val client = LocationServices.getSettingsClient(this)
-//            val task : Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-//
-//            task.addOnSuccessListener { response -> ensurePermissionsEnabled() }
-//            task.addOnFailureListener { exception ->
-//                if (exception is ResolvableApiException) {
-//                    try {
-//                        exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
-//                    } catch (sendEx: IntentSender.SendIntentException) {
-//                        Log.d(TAG, sendEx.toString())
-//                    }
-//                }
-//            }
-//
-//        }
-//
-//
-//    }
-
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//
-//    }
-//
-//    private fun ensurePermissionsEnabled() {
-//
-//    }
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            LOCATION_ACCESS_REQUEST -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    Toast.makeText(this, "Location ENABLED!! YAY", Toast.LENGTH_LONG).show()
+                    updateUserEnabledTracking(true)
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Toast.makeText(this, "Location not enabled", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 }
 

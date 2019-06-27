@@ -9,7 +9,9 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import co.hannalupi.locationtracker.MainActivity
 import co.hannalupi.locationtracker.R
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationAvailability
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 
 class LocationForegroundService : Service() {
 
@@ -17,17 +19,15 @@ class LocationForegroundService : Service() {
     private val NOTIFICATION_CHANNEL_ID = "locationForegroundService"
     private val NOTIFICATION_CHANNEL_NAME = "channel_location_service"
 
-    // TODO: Add location request constants
     private val binder = LocationBinder()
 
-
     override fun onCreate() {
-        super.onCreate()
+        createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // START_STICKY - Used explicitly for services started and stopped as needed
-        return START_STICKY
+
+        return START_NOT_STICKY // Tells system not to recreate service once killed
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -54,37 +54,36 @@ class LocationForegroundService : Service() {
     }
 
     fun registerLocationUpdates() {
-
+        startService(Intent(applicationContext, LocationForegroundService::class.java))
     }
 
     fun unregisterLocationUpdated() {
-
+        // TODO: Unregister for location updates
     }
 
-    fun createLocationRequest(): LocationRequest {
-        // TODO: Update
-        return LocationRequest.create()
+    inner class LocationServiceCallback : LocationCallback() {
+        override fun onLocationResult(p0: LocationResult?) {
+            super.onLocationResult(p0)
+        }
+
+        override fun onLocationAvailability(p0: LocationAvailability?) {
+            super.onLocationAvailability(p0)
+        }
     }
 
     inner class LocationBinder : Binder() {
         fun getService(): LocationForegroundService {
             return this@LocationForegroundService
         }
-
-        fun getLocationRequest() : LocationRequest {
-            return this@LocationForegroundService.createLocationRequest()
-        }
     }
 
     private fun getNotification() : Notification {
-        //If needed creates notification channel
-        createNotificationChannel()
-
         val contentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
         val notification : Notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(getText(R.string.notification_title))
             .setContentText(getText(R.string.notification_title))
             .setContentIntent(contentIntent)
+            .setPriority(NotificationManager.IMPORTANCE_HIGH)
             .setSmallIcon(R.drawable.ic_location_on_black_24dp)
             .setOngoing(true)
             .build()
