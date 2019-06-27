@@ -5,8 +5,8 @@ import com.google.android.gms.location.LocationRequest
 class LocationUtils {
     companion object {
 
-        val REQUEST_INTERVAL = 120_000L // 2 Minutes
-        val REQUEST_FASTEST_INTERVAL = 60_000L // 1 Minute
+        val REQUEST_INTERVAL = 30_000L // 30 Seconds
+        val REQUEST_FASTEST_INTERVAL = 15_000L // 15 Seconds
         val REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY
 
 

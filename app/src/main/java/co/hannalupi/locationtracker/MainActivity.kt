@@ -82,8 +82,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             isBound = false
         }
         super.onStop()
-
-        //startService(Intent(this, LocationForegroundService::class.java))
     }
 
     fun startTracking(view: View) {
@@ -93,6 +91,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     fun stopTracking(view : View) {
         Log.d(TAG, "stopTracking()")
+        service?.unregisterLocationUpdates()
         updateUserEnabledTracking(false)
     }
 
