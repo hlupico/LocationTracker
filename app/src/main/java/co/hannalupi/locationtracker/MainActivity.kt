@@ -11,7 +11,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import co.hannalupi.locationtracker.adapter.LocationListAdapter
 import co.hannalupi.locationtracker.service.LocationForegroundService
+import co.hannalupi.locationtracker.viewmodel.LocationViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -40,6 +47,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         stopBtn = findViewById(R.id.btn_stop)
 
         sharedPrefs = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE)
+
+        val adapter = LocationListAdapter(this)
+        val viewModel = ViewModelProviders.of(this).get(LocationViewModel::class.java)
+
+        val binding : co.hannalupi.locationtracker.databinding.ContentMainBinding = DataBindingUtil.setContentView(this, R.layout.content_main)
+        binding.setLifecycleOwner(this)
+        binding.viewmodel = viewModel
+
+        val recyclerView : RecyclerView = findViewById(R.id.recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
+        recyclerView.adapter = adapter
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

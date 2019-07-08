@@ -12,11 +12,16 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import co.hannalupi.locationtracker.LocationUtils
 import co.hannalupi.locationtracker.MainActivity
+import co.hannalupi.locationtracker.persistence.LocationDatabase
+import co.hannalupi.locationtracker.repo.LocationRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class LocationForegroundService : Service() {
 
@@ -29,11 +34,21 @@ class LocationForegroundService : Service() {
     private lateinit var binder : IBinder
     private lateinit var locationCallback : LocationServiceCallback
     private lateinit var fusedClient : FusedLocationProviderClient
+    private lateinit var database : LocationDatabase
+    private lateinit var repo : LocationRepository
+
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
 
     override fun onCreate() {
 
         locationCallback = LocationServiceCallback()
         binder = LocationBinder()
+        database = LocationDatabase.getDatabase(this.applicationContext)
+        if(::database.isInitialized) {
+            repo = LocationRepository(database.getLocationDao())
+        }
 
         createNotificationChannel()
     }
@@ -61,6 +76,10 @@ class LocationForegroundService : Service() {
         super.onConfigurationChanged(newConfig)
     }
 
+    override fun onDestroy() {
+        serviceJob.cancel()
+    }
+
     fun registerLocationUpdates() {
         startService(Intent(applicationContext, LocationForegroundService::class.java))
 
@@ -75,6 +94,8 @@ class LocationForegroundService : Service() {
     }
 
     fun unregisterLocationUpdates() {
+
+        // TODO: Needs fix, Sometimes this crashes because fusedClient wasn't initilized in the current session
         try {
             fusedClient.removeLocationUpdates(locationCallback)
             stopSelf()
@@ -110,6 +131,17 @@ class LocationForegroundService : Service() {
 
     private fun onNewLocation(location : Location?) {
         Log.d(TAG, location.toString())
+
+        location?.let {
+            serviceScope.launch {
+                val location = co.hannalupi.locationtracker.persistence.Location(
+                    it.time,
+                    it.latitude,
+                    it.longitude
+                )
+                repo.insert(location)
+            }
+        }
     }
 
     inner class LocationBinder : Binder() {

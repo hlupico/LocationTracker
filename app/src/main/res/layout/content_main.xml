@@ -1,68 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:showIn="@layout/activity_main"
-    tools:context=".MainActivity">
-    <!--TODO: MAKE SCROLLABLE -->
+<layout>
+    <data>
+        <variable name="viewmodel" type="co.hannalupi.locationtracker.viewmodel.LocationViewModel"/>
+    </data>
 
-
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.158"
-            android:id="@+id/textView"/>
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            android:gravity="center" android:id="@+id/linearLayout">
+            android:layout_height="match_parent"
+            tools:showIn="@layout/activity_main"
+            tools:context=".MainActivity">
 
-        <Button
-                android:id="@+id/btn_start"
+        <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_start_msg"
-                android:clickable="true"
-                android:onClick="startTracking"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:text="Hello World!"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_bias="0.0"
-                android:layout_marginStart="40dp"/>
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.158"
+                android:id="@+id/textView"/>
 
-        <Button
-                android:id="@+id/btn_stop"
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_stop_msg"
-                android:clickable="true"
-                android:onClick="stopTracking"
-                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@+id/textView"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/btn_start"
-                android:layout_marginStart="8dp"/>
-    </LinearLayout>
+                android:gravity="center" android:id="@+id/linearLayout">
 
-    <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="395dp"
-            android:layout_height="528dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout"/>
+            <Button
+                    android:id="@+id/btn_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_start_msg"
+                    android:clickable="true"
+                    android:onClick="startTracking"
+                    app:layout_constraintTop_toBottomOf="@+id/textView"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    android:layout_marginStart="40dp"/>
+
+            <Button
+                    android:id="@+id/btn_stop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_stop_msg"
+                    android:clickable="true"
+                    android:onClick="stopTracking"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/textView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/btn_start"
+                    android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="395dp"
+                android:layout_height="528dp"
+                app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0" android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout" android:id="@+id/recycler_view"
+                app:data="@{viewmodel.locations}"/>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
